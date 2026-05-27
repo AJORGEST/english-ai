@@ -43,6 +43,29 @@ export default function App() {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState('free');
+
+  const handleTopicChange = async (newTopic) => {
+    setSelectedTopic(newTopic);
+    setMessages([]);
+    // Clear history on backend silently
+    await fetch(`${API_BASE}/clear`, { method: 'POST' }).catch(() => {});
+    // Auto-start conversation with new topic
+    if (newTopic !== 'free') {
+      setIsTyping(true);
+      try {
+        const res = await fetch(`${API_BASE}/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: 'Hi, let\'s talk!', topic: newTopic })
+        });
+        if (res.ok) {
+          await fetchHistory();
+          await fetchStats();
+        }
+      } catch (e) {}
+      setIsTyping(false);
+    }
+  };
   const [isRecording, setIsRecording] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState('');
   const [currentlySpeakingId, setCurrentlySpeakingId] = useState(null);
@@ -208,10 +231,6 @@ export default function App() {
 
   // API Call: Clear History
   const handleClearHistory = async () => {
-    if (!window.confirm('Tem certeza que deseja apagar todo o histórico de conversas e progresso?')) {
-      return;
-    }
-    
     try {
       stopSpeaking();
       setCurrentlySpeakingId(null);
@@ -421,7 +440,7 @@ export default function App() {
         <div className="lg:col-span-2 flex flex-col h-[calc(100vh-180px)] lg:h-[calc(100vh-140px)] min-h-[500px] space-y-2">
           {/* Topic Selector */}
           <div className="flex-shrink-0 bg-white/60 dark:bg-slate-900/40 rounded-2xl border border-slate-200/60 dark:border-slate-800/40 shadow-sm">
-            <TopicSelector selectedTopic={selectedTopic} onSelectTopic={setSelectedTopic} />
+            <TopicSelector selectedTopic={selectedTopic} onSelectTopic={handleTopicChange} />
           </div>
 
           {/* Chat box container */}
