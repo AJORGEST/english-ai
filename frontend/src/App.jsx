@@ -7,7 +7,11 @@ import {
   Layers, 
   AlertCircle,
   CheckCircle,
-  ExternalLink
+  ExternalLink,
+  ArrowRightLeft,
+  FileText,
+  BarChart3,
+  X
 } from 'lucide-react';
 
 import ChatWindow from './components/ChatWindow';
@@ -54,6 +58,8 @@ export default function App() {
   const [quizScore, setQuizScore] = useState(() => {
     return parseInt(localStorage.getItem('quizScore') || '0', 10);
   });
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [mobileTab, setMobileTab] = useState('translator');
   const [darkTheme, setDarkTheme] = useState(() => {
     // Check localStorage or system preference
     const saved = localStorage.getItem('theme');
@@ -469,56 +475,60 @@ export default function App() {
 
       </main>
 
-      {/* Floating button for mobile dashboard drawer */}
+      {/* Floating button for mobile tools drawer */}
       <div className="lg:hidden fixed bottom-24 right-4 z-40">
         <button 
-          onClick={() => {
-            // Simple overlay display using a full screen backdrop or toggle
-            const dashboardEl = document.getElementById('mobile-dashboard');
-            if (dashboardEl) {
-              dashboardEl.classList.toggle('hidden');
-            }
-          }}
+          onClick={() => setMobileDrawerOpen(true)}
           className="p-4 bg-violet-600 text-white rounded-full shadow-lg hover:bg-violet-700 transition-all flex items-center justify-center focus:outline-none"
         >
           <BookOpen className="w-6 h-6" />
         </button>
       </div>
 
-      {/* Mobile dashboard overlay */}
-      <div 
-        id="mobile-dashboard"
-        className="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm lg:hidden flex justify-end animate-fadeIn"
-      >
-        <div className="w-[85vw] max-w-[360px] h-full bg-white dark:bg-slate-950 p-6 overflow-hidden flex flex-col relative shadow-2xl">
-          <button 
-            onClick={() => {
-              const dashboardEl = document.getElementById('mobile-dashboard');
-              if (dashboardEl) {
-                dashboardEl.classList.add('hidden');
-              }
-            }}
-            className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none text-xl font-bold"
-          >
-            ✕
-          </button>
-          
-          <div className="flex-1 mt-4 overflow-hidden">
-            <StatsDashboard 
-              stats={stats}
-              onRetrySentence={(sentence) => {
-                handleRetrySentence(sentence);
-                const dashboardEl = document.getElementById('mobile-dashboard');
-                if (dashboardEl) {
-                  dashboardEl.classList.add('hidden');
-                }
-              }}
-              isLoadingStats={isLoadingStats}
-              onRefresh={fetchStats}
-            />
+      {/* Mobile tools drawer */}
+      {mobileDrawerOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm lg:hidden flex justify-end animate-fadeIn">
+          <div className="w-[90vw] max-w-[400px] h-full bg-white dark:bg-slate-950 flex flex-col relative shadow-2xl">
+            {/* Close button */}
+            <button 
+              onClick={() => setMobileDrawerOpen(false)}
+              className="absolute top-3 right-3 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none z-10"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Tabs */}
+            <div className="flex border-b border-slate-200 dark:border-slate-800 pt-3 px-2">
+              <button onClick={() => setMobileTab('translator')} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold rounded-t-lg transition-colors ${mobileTab === 'translator' ? 'bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400 border-b-2 border-violet-600' : 'text-slate-500'}`}>
+                <ArrowRightLeft className="w-3.5 h-3.5" /> Tradutor
+              </button>
+              <button onClick={() => setMobileTab('reader')} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold rounded-t-lg transition-colors ${mobileTab === 'reader' ? 'bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400 border-b-2 border-violet-600' : 'text-slate-500'}`}>
+                <FileText className="w-3.5 h-3.5" /> Leitor
+              </button>
+              <button onClick={() => setMobileTab('stats')} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold rounded-t-lg transition-colors ${mobileTab === 'stats' ? 'bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400 border-b-2 border-violet-600' : 'text-slate-500'}`}>
+                <BarChart3 className="w-3.5 h-3.5" /> Stats
+              </button>
+            </div>
+
+            {/* Tab content */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {mobileTab === 'translator' && <Translator />}
+              {mobileTab === 'reader' && <TextReader />}
+              {mobileTab === 'stats' && (
+                <StatsDashboard 
+                  stats={stats}
+                  onRetrySentence={(sentence) => {
+                    handleRetrySentence(sentence);
+                    setMobileDrawerOpen(false);
+                  }}
+                  isLoadingStats={isLoadingStats}
+                  onRefresh={fetchStats}
+                />
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
