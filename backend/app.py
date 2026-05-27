@@ -116,7 +116,7 @@ def chat():
 Você é um professor de inglês amigável, acolhedor e altamente qualificado. 
 Sua tarefa é analisar a frase enviada pelo aluno, corrigindo quaisquer erros gramaticais, ortográficos ou de escolha de palavras, e responder de forma a manter a conversa fluindo.
 {topic_instruction}
-Mantenha suas perguntas e respostas dentro do tema escolhido. As sugestões de resposta do quiz também devem ser sobre o tema.
+IMPORTANTE: Ignore o histórico anterior se ele não for sobre o tema atual. Foque EXCLUSIVAMENTE no tema escolhido. Suas perguntas, respostas e sugestões do quiz devem ser 100% sobre o tema.
 
 Histórico recente da conversa:
 {context}
