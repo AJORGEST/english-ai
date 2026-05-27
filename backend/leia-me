@@ -1,0 +1,15 @@
+On macOS, pip isn't available directly — use pip3 instead:
+  
+  pip3 install -r requirements.txt
+  python3 app.py
+  
+  If pip3 isn't found either, install it via:
+  
+  python3 -m ensurepip --upgrade
+  
+  Or if you're using a virtual environment (recommended):
+  
+  python3 -m venv venv
+  source venv/bin/activate
+  pip install -r requirements.txt
+  python app.py
