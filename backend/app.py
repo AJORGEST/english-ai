@@ -13,7 +13,7 @@ app = Flask(__name__)
 # Habilita CORS para permitir comunicação do React frontend
 CORS(app, origins=["http://localhost:5173", "http://127.0.0.1:5173", os.environ.get("FRONTEND_URL", "*")])
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "database.db")
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "database.db")
 
 # Placeholder padrão do arquivo .env.example — considerado como não configurado
 PLACEHOLDER_KEY = "SUA_CHAVE_API_AQUI"

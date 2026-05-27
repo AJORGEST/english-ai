@@ -3,8 +3,8 @@ services:
     name: english-ai-backend
     runtime: python
     rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    buildCommand: chmod +x build.sh && ./build.sh
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120
     envVars:
       - key: GEMINI_API_KEY
         sync: false
