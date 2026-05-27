@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import json
+import logging
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import google.generativeai as genai
@@ -8,6 +9,8 @@ from dotenv import load_dotenv
 
 # Carrega variáveis de ambiente do arquivo .env se existir
 load_dotenv()
+
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 # Habilita CORS para permitir comunicação do React frontend
@@ -205,14 +208,14 @@ Exemplo de formato de retorno esperado:
         # Retorna o resultado para o frontend
         return jsonify(result)
 
-    except json.JSONDecodeError as je:
-        print(f"Erro ao decodificar JSON do Gemini: {response.text}")
+    except json.JSONDecodeError:
+        logging.exception("Failed to decode Gemini JSON response")
         return jsonify({
             "error": "Erro no processamento da resposta da IA",
             "reply": "Sorry, I had trouble organizing my thoughts. Could you repeat that?"
         }), 500
     except Exception as e:
-        print(f"Erro geral: {str(e)}")
+        logging.exception("Chat error")
         return jsonify({
             "error": "Erro interno",
             "reply": "Sorry, I am facing some connection issues. Let's try again in a moment."
@@ -256,7 +259,8 @@ def history():
                 history_list.append(entry)
             return jsonify(history_list)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logging.exception("Error fetching history")
+        return jsonify({"error": "Internal server error"}), 500
 
 @app.route("/clear", methods=["POST"])
 def clear():
@@ -267,7 +271,8 @@ def clear():
             conn.commit()
         return jsonify({"status": "success", "message": "Histórico limpo com sucesso!"})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logging.exception("Error clearing history")
+        return jsonify({"error": "Internal server error"}), 500
 
 @app.route("/stats", methods=["GET"])
 def stats():
@@ -324,7 +329,8 @@ def stats():
                 "revision_list": revision_list
             })
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        logging.exception("Error fetching stats")
+        return jsonify({"error": "Internal server error"}), 500
 
 @app.route("/")
 def index():
@@ -359,9 +365,10 @@ def translate():
         result = json.loads(response.text.strip())
         return jsonify(result)
     except Exception as e:
-        print(f"Erro tradução: {str(e)}")
+        logging.exception("Translation error")
         return jsonify({"error": "Erro ao traduzir"}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    debug = os.getenv("FLASK_DEBUG", "False") == "True"
+    app.run(host="0.0.0.0", port=port, debug=debug)
